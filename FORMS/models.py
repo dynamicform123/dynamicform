@@ -1,8 +1,5 @@
 from django.db import models
 
-# Create your models here.
-from django.db import models
-
 class Form(models.Model):
     name = models.CharField(max_length=255)  
     created_at = models.DateField(auto_now_add=True)  
@@ -23,7 +20,7 @@ class UserProfile(models.Model):
     preferred_location = models.CharField(max_length=20, choices=LOCATION_CHOICES)
     brief = models.TextField()
     username = models.CharField(max_length=255, unique=True)
-    password = models.CharField(max_length=255)  # Encrypt this in production
+    password = models.CharField(max_length=255)  
     form_banner = models.ImageField(upload_to='form_banners/', blank=True, null=True)
 
     def __str__(self):
@@ -78,14 +75,13 @@ class FormUser(AbstractUser):
 class FormSubmission(models.Model):
     user = models.ForeignKey(FormUser, on_delete=models.CASCADE)
     form = models.ForeignKey(Form, on_delete=models.CASCADE)
-    data = models.JSONField()  # Stores dynamic field answers in JSON format
+    data = models.JSONField()  
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.email} - {self.form.name}"
 
-
-    
+  
 
 
 
@@ -96,7 +92,7 @@ class DynamicField(models.Model):
         choices=[("Text", "Text"), ("Number", "Number"), ("Date", "Date"), ("Dropdown", "Dropdown")]
     )
     field_label = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=True)  # To enable/disable fields dynamically
+    is_active = models.BooleanField(default=True)  
 
     def __str__(self):
         return self.field_label

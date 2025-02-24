@@ -1,8 +1,20 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .models import Form, FormDynamic, Contact
-from .forms import AdminLoginForm, FormDynamicForm
+from .models import *
+from .forms import *
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from .forms import UserRegisterForm, UserLoginForm
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+import json
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from .models import FormDynamic, FormSubmission
+
+ ## Admin Login 
 
 def admin_login(request):
     if request.method == "POST":
@@ -44,10 +56,10 @@ def logout_view(request):
     logout(request)
     return redirect('admin_login')
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from .forms import UserRegisterForm, UserLoginForm
-from django.contrib.auth.decorators import login_required
+
+
+    
+## User Login url
 
 def user_register(request):
     if request.method == "POST":
@@ -65,14 +77,14 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('userdashboard')
+            return redirect('user_dashboard')
     else:
         form = UserLoginForm()
     return render(request, 'user_login.html', {'form': form})
 
 @login_required
 def user_dashboard(request):
-    return render(request, 'userdashboard.html')
+    return render(request, 'user_dashboard.html')
 
 def user_logout(request):
     logout(request)
@@ -82,14 +94,7 @@ def user_logout(request):
 def user_dashboard(request):
     user_email = request.user.email
     available_forms = FormDynamic.objects.filter(accessible_users__icontains=user_email, status='Active')
-    return render(request, 'userdashboard.html', {'forms': available_forms})
-
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-import json
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
-from .models import FormDynamic, FormSubmission
+    return render(request, 'user_dashboard.html', {'forms': available_forms})
 
 @login_required
 @csrf_exempt
@@ -107,216 +112,7 @@ def fill_form(request, form_id):
     return render(request, 'fill_form.html', {'form': form})
 
 
-########
-
-from django.http import HttpResponse
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from .models import FormSubmission
-
-def download_pdf(request, submission_id):
-    submission = FormSubmission.objects.get(id=submission_id)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{submission.form.form.name}.pdf"'
-
-    p = canvas.Canvas(response, pagesize=letter)
-    p.drawString(100, 750, f"Form Name: {submission.form.form.name}")
-    p.drawString(100, 730, f"User: {submission.user.email}")
-    p.drawString(100, 710, "Submitted Data:")
-
-    y_position = 690
-    for key, value in submission.data.items():
-        p.drawString(120, y_position, f"{key}: {value}")
-        y_position -= 20
-
-    p.showPage()
-    p.save()
-    return response
-######
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-
-def send_submission_email(request, submission_id):
-    submission = FormSubmission.objects.get(id=submission_id)
-    subject = f"Form Submission: {submission.form.form.name}"
-    html_message = render_to_string('email_template.html', {'submission': submission})
-    plain_message = strip_tags(html_message)
-    send_mail(subject, plain_message, 'your-email@gmail.com', [submission.user.email], html_message=html_message)
-    return HttpResponse("Email sent successfully!")
-
-#####
-
-from django.shortcuts import render
-
-def print_submission(request, submission_id):
-    submission = FormSubmission.objects.get(id=submission_id)
-    return render(request, 'print_submission.html', {'submission': submission})
-
-
-def download_pdf(request, submission_id):
-    submission = FormSubmission.objects.get(id=submission_id)
-    if submission.user != request.user:
-        return HttpResponse("Unauthorized", status=403)
-
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{submission.form.form.name}.pdf"'
-
-    p = canvas.Canvas(response, pagesize=letter)
-    p.drawString(100, 750, f"Form Name: {submission.form.form.name}")
-    p.drawString(100, 730, f"User: {submission.user.email}")
-    p.drawString(100, 710, "Submitted Data:")
-
-    y_position = 690
-    for key, value in submission.data.items():
-        p.drawString(120, y_position, f"{key}: {value}")
-        y_position -= 20
-
-    p.showPage()
-    p.save()
-    return response
-
-
-from django.shortcuts import render
-
-def form_builder(request):
-    return render(request, "admin_form_builder.html")
-######
-
-# import json
-# from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-# from .models import Form, DynamicField
-
-# @csrf_exempt
-# def save_form(request):
-#     if request.method == "POST":
-#         data = json.loads(request.body)
-#         form = Form.objects.create(name=data["name"], created_by=request.user)
-
-#         for field in data["fields"]:
-#             DynamicField.objects.create(form=form, field_label=field["label"], field_type=field["type"])
-
-#         return JsonResponse({"message": "Form saved successfully!"})
-
-# #
-
-# def load_form(request, form_id):
-#     form = Form.objects.get(id=form_id)
-#     fields = form.fields.all()
-#     field_data = [{"label": field.field_label, "type": field.field_type} for field in fields]
-    
-#     return JsonResponse({"name": form.name, "fields": field_data})
-
-
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
-from .models import Form, DynamicField, FormSubmission
-
-def form_view(request, form_id):
-    form = get_object_or_404(Form, id=form_id)
-    fields = DynamicField.objects.filter(form=form, is_active=True)  # Show only active fields
-    
-    if request.method == "POST":
-        data = {field.field_label: request.POST.get(field.field_label, '') for field in fields}
-        FormSubmission.objects.create(user=request.user, form=form, data=data)
-
-        
-        return JsonResponse({"message": "Form submitted successfully!"})
-    
-    return render(request, "form_template.html", {"form": form, "fields": fields})
-
-
-from django.shortcuts import render
-from .models import FormSubmission
-
-def submission_list(request):
-    submissions = FormSubmission.objects.all().order_by("-submitted_at")
-    return render(request, "submission_list.html", {"submissions": submissions})
-
-from django.shortcuts import redirect, get_object_or_404
-from django.http import JsonResponse
-
-def edit_submission(request, submission_id):
-    submission = get_object_or_404(FormSubmission, id=submission_id)
-    
-    if request.method == "POST":
-        submission.data = request.POST.dict()  # Update data
-        submission.save()
-        return JsonResponse({"message": "Submission updated successfully!"})
-    
-    return render(request, "edit_submission.html", {"submission": submission})
-
-
-
-#############3
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from .forms import UserRegisterForm, StudentForm
-from .models import Student
-from django.contrib.auth.decorators import login_required
-
-def studentregister_view(request):
-    if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('dashboard')
-    else:
-        form = UserRegisterForm()
-    return render(request, 'accounts/register.html', {'form': form})
-
-
-
-
-
-
-
-from django.contrib.auth import authenticate, login, logout
-
-def studentlogin_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('dashboard')
-    return render(request, 'accounts/login.html')
-
-
-@login_required
-def studentdashboard_view(request):
-    if request.user.is_authenticated:
-        form = StudentForm()
-        students = Student.objects.filter(created_by=request.user)
-        return render(request, 'accounts/dashboard.html', {'form': form, 'students': students})
-    return redirect('login')
-
-
-@login_required
-def studentsubmit_student_form(request):
-    if request.method == 'POST':
-        form = StudentForm(request.POST)
-        if form.is_valid():
-            student = form.save(commit=False)
-            student.created_by = request.user
-            student.save()
-            return redirect('dashboard')
-    return redirect('dashboard')
-
-
-def studentlogout_view(request):
-    logout(request)
-    return redirect('login')
-
-
-
-from django.shortcuts import render, redirect
-from .forms import UserProfileForm
-from .models import UserProfile
+# Basic forms
 
 # Profile Form View
 def profile_form_view(request):
@@ -330,23 +126,40 @@ def profile_form_view(request):
     
     return render(request, 'formbuilder/profile_form.html', {'form': form})
 
+def profile_update_view(request, pk):
+    profile = get_object_or_404(UserProfile, pk=pk)
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile_list')
+    else:
+        form = UserProfileForm(instance=profile)
+    
+    return render(request, 'formbuilder/profile_form.html', {'form': form})
+
+# Delete Profile
+def profile_delete_view(request, pk):
+    profile = get_object_or_404(UserProfile, pk=pk)
+    if request.method == 'POST':
+        profile.delete()
+        return redirect('profile_list')
+    
+    return render(request, 'formbuilder/profile_confirm_delete.html', {'profile': profile})
+
 # Profile List View
 def profile_list_view(request):
     profiles = UserProfile.objects.all()
     return render(request, 'formbuilder/profile_list.html', {'profiles': profiles})
 
+## Basic Forms valid
 
-
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import FormDynamic
-from .forms import FormDynamicForm
-
-# 📌 List View for Dynamic Forms
+#  List View for Dynamic Forms
 def form_dynamic_list(request):
     forms = FormDynamic.objects.all().order_by('sort_order')
     return render(request, 'FORMS/form_dynamic_list.html', {'forms': forms})
 
-# 📌 Create View for Dynamic Forms
+#  Create View for Dynamic Forms
 def form_dynamic_create(request):
     if request.method == 'POST':
         form = FormDynamicForm(request.POST, request.FILES)
@@ -357,7 +170,7 @@ def form_dynamic_create(request):
         form = FormDynamicForm()
     return render(request, 'FORMS/form_dynamic_form.html', {'form': form})
 
-# 📌 Update View for Dynamic Forms
+#  Update View for Dynamic Forms
 def form_dynamic_update(request, pk):
     form_instance = get_object_or_404(FormDynamic, pk=pk)
     if request.method == 'POST':
@@ -369,57 +182,41 @@ def form_dynamic_update(request, pk):
         form = FormDynamicForm(instance=form_instance)
     return render(request, 'FORMS/form_dynamic_form.html', {'form': form})
 
-# 📌 Delete View for Dynamic Forms
+#  Delete View for Dynamic Forms
 def form_dynamic_delete(request, pk):
     form_instance = get_object_or_404(FormDynamic, pk=pk)
     if request.method == 'POST':
         form_instance.delete()
         return redirect('form_dynamic_list')
     return render(request, 'FORMS/form_dynamic_delete.html', {'form': form_instance})
+def form_builder(request):
+    return render(request, "admin_form_builder.html")
 
 
-#########3
+def form_view(request, form_id):
+    form = get_object_or_404(Form, id=form_id)
+    fields = DynamicField.objects.filter(form=form, is_active=True)    
+    if request.method == "POST":
+        data = {field.field_label: request.POST.get(field.field_label, '') for field in fields}
+        FormSubmission.objects.create(user=request.user, form=form, data=data)        
+        return JsonResponse({"message": "Form submitted successfully!"})   
+    return render(request, "form_template.html", {"form": form, "fields": fields})
 
-from django.shortcuts import render, redirect
-from .models import Form
-from .forms import FormCreateForm, DynamicFormFieldForm
+def submission_list(request):
+    submissions = FormSubmission.objects.all().order_by("-submitted_at")
+    return render(request, "submission_list.html", {"submissions": submissions})
+def edit_submission(request, submission_id):
+    submission = get_object_or_404(FormSubmission, id=submission_id)
+    
+    if request.method == "POST":
+        submission.data = request.POST.dict()  # Update data
+        submission.save()
+        return JsonResponse({"message": "Submission updated successfully!"})
+    
+    return render(request, "edit_submission.html", {"submission": submission})
 
-# List all forms
-def form_list(request):
-    forms = Form.objects.all()
-    return render(request, 'form_list.html', {'forms': forms})
 
-# Create a new form
-def form_create(request):
-    if request.method == 'POST':
-        form = FormCreateForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('form_list')
-    else:
-        form = FormCreateForm()
-    return render(request, 'form_create.html', {'form': form})
-
-# View form details
-def form_detail(request, form_id):
-    form = Form.objects.get(id=form_id)
-    fields = DynamicFormFieldForm.objects.filter(form=form)
-    return render(request, 'form_detail.html', {'form': form, 'fields': fields})
-
-# Add fields to a form
-def form_field_add(request):
-    if request.method == 'POST':
-        form = DynamicFormFieldForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('form_list')
-    else:
-        form = DynamicFormFieldForm()
-    return render(request, 'form_field_add.html', {'form': form})
-########
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Contact
-from .forms import ContactForm
+## Contacts Forms
 
 # List all contacts
 def contact_list(request):
@@ -456,8 +253,42 @@ def contact_delete(request, contact_id):
         contact.delete()
         return redirect('contact_list')
     return render(request, 'formbuilder/contact_delete.html', {'contact': contact})
-###########
 
+
+## Forms
+
+# List all forms
+def form_list(request):
+    forms = Form.objects.all()
+    return render(request, 'form02_list.html', {'forms': forms})
+
+# Create a new form
+def form_create(request):
+    if request.method == 'POST':
+        form = FormCreateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('form02_list')
+    else:
+        form = FormCreateForm()
+    return render(request, 'form_create.html', {'form': form})
+
+# View form details
+def form_detail(request, form_id):
+    form = Form.objects.get(id=form_id)
+    fields = DynamicFormFieldForm.objects.filter(form=form)
+    return render(request, 'form_detail.html', {'form': form, 'fields': fields})
+
+# Add fields to a form
+def form_field_add(request):
+    if request.method == 'POST':
+        form = DynamicFormFieldForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('form_list')
+    else:
+        form = DynamicFormFieldForm()
+    return render(request, 'form_field_add.html', {'form': form})
 def load_form(request):
     form_type = request.GET.get("form_type")  # Get selected form type
     if form_type == "UserProfile":
@@ -468,3 +299,110 @@ def load_form(request):
         form = None
 
     return render(request, "form_partial.html", {"form": form})
+
+###################
+
+def print_submission(request, submission_id):
+    submission = FormSubmission.objects.get(id=submission_id)
+    return render(request, 'print_submission.html', {'submission': submission})
+
+
+##### email
+from django.core.mail import EmailMessage
+import io
+from reportlab.pdfgen import canvas
+from .models import FormSubmission
+
+def send_submission_email(request, submission_id):
+    # FormSubmission ஐ பெறுதல்
+    submission = FormSubmission.objects.get(id=submission_id)
+    
+    # PDF உருவாக்குதல்
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    p.drawString(100, 750, f"Form Name: {submission.form.form.name}")
+    p.drawString(100, 730, f"User: {submission.user.email}")
+    p.drawString(100, 710, "Submitted Data:")
+    
+    y_position = 690
+    for key, value in submission.data.items():
+        p.drawString(120, y_position, f"{key}: {value}")
+        y_position -= 20
+    
+    p.showPage()
+    p.save()
+    buffer.seek(0)
+    
+    # மின்னஞ்சல் விவரங்கள்
+    subject = f"Form Submission: {submission.form.form.name}"
+    message = "Please find the attached form submission PDF."
+    from_email = 'your_email@example.com'
+    recipient_list = [submission.user.email]
+    
+    # மின்னஞ்சல் உருவாக்குதல்
+    email = EmailMessage(subject, message, from_email, recipient_list)
+    email.attach(f"{submission.form.form.name}.pdf", buffer.getvalue(), 'application/pdf')
+    email.send()
+    
+    return HttpResponse("Email sent successfully!")
+
+## pdf
+
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from .models import FormSubmission
+
+def download_pdf(request, submission_id):
+    # FormSubmission ஐ பெறுதல்
+    submission = FormSubmission.objects.get(id=submission_id)
+    
+    # HTTP பதிலாக PDF அமைத்தல்
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{submission.form.form.name}.pdf"'
+    
+    # PDF உருவாக்குதல்
+    p = canvas.Canvas(response, pagesize=letter)
+    p.drawString(100, 750, f"Form Name: {submission.form.form.name}")
+    p.drawString(100, 730, f"User: {submission.user.email}")
+    p.drawString(100, 710, "Submitted Data:")
+    
+    y_position = 690
+    for key, value in submission.data.items():
+        p.drawString(120, y_position, f"{key}: {value}")
+        y_position -= 20
+    
+    p.showPage()
+    p.save()
+    return response
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

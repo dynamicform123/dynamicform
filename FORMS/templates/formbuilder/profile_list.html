@@ -1,4 +1,4 @@
-{% extends 'formbuilder/base.html'  %}
+{% extends 'formbuilder/base.html' %}
 
 {% block content %}
 <h2 class="text-center">User Profiles</h2>
@@ -14,6 +14,7 @@
             <th>Brief</th>
             <th>Username</th>
             <th>Form Banner</th>
+            <th>Actions</th> <!-- New column for update & delete buttons -->
         </tr>
     </thead>
     <tbody>
@@ -34,12 +35,18 @@
                 No Image
                 {% endif %}
             </td>
+            <td>
+                <a href="{% url 'profile_update' profile.id %}" class="btn btn-warning">Edit</a>
+                <a href="{% url 'profile_delete' profile.id %}" class="btn btn-danger">Delete</a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
 <a href="/FORMS_Dyn/dynamic-forms/">
-    <button>Form Creater</button>
-         </a>
+    <button class="btn btn-primary">Form Creator</button>
+</a>
 
 {% endblock %}
+

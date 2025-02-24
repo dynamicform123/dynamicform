@@ -1,0 +1,155 @@
+
+{% extends "base.html" %}
+
+{% block title %}Form List{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 20px;
+        padding: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+    th:hover {
+        background-color: #0056b3;
+    }
+    .btn {
+        padding: 8px 12px;
+        margin: 4px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn-primary { background-color: #007bff; color: white; }
+    .btn-danger { background-color: #dc3545; color: white; }
+    .btn-success { background-color: #28a745; color: white; }
+    .btn:hover { opacity: 0.8; }
+    .container {
+        max-width: 80%;
+        margin: auto;
+    }
+</style>
+
+<a href="/FORMS_Dyn/createforms/create/">
+    <button>Form Creater</button>
+         </a>
+
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Form Name <i class="fa fa-sort"></i></th>
+                <th onclick="sortTable(1)">Form Created <i class="fa fa-sort"></i></th>
+                <th onclick="sortTable(2)">Form Last Updated <i class="fa fa-sort"></i></th>
+                <th>Actions</th>
+                
+            </tr>
+        </thead>
+        <tbody id="formTable">
+            {% for form in forms %}
+                <tr>
+                    <td>{{ form.name }}</td>
+                    <td>{{ form.created_at }}</td>
+                    <td>{{ form.updated_at }}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="window.location">Print</button>
+                        <button class="btn btn-danger" onclick="window.location">Download PDF</button>
+                        <button class="btn btn-success" onclick="window.location">Send Email</button>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" class="text-center">No forms available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function printForm(formName) {
+    alert("Printing Form: " + formName);
+    window.print();
+}
+function downloadPDF(formName) {
+    alert("Downloading PDF for: " + formName);
+    window.location.href = `/generate_pdf/?form_name=${formName}`;
+}
+function sendEmail(formName) {
+    alert("Sending Email for: " + formName);
+    window.location.href = `/send_email/?form_name=${formName}`;
+}
+function sortTable(n) {
+    let table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.querySelector("table");
+    switching = true;
+    dir = "asc";
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount === 0 && dir === "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+</script>
+
+<a href="/FORMS_Dyn/dashboard/">
+    <button>userdashboard</button>
+         </a>
+
+
+
+
+{% endblock %}
+
+
+
+
+
+    
+            
+ 
+
+
+
+

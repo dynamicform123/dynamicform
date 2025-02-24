@@ -1,26 +1,11 @@
 from django import forms
-from .models import Form, FormDynamic, Contact, UserProfile,DynamicField
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .models import *
 
 class AdminLoginForm(forms.Form):
     username = forms.CharField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput)
 
-# class FormDynamicForm(forms.ModelForm):
-#     class Meta:
-#         model = FormDynamic
-#         fields = '__all__'
-
-from django import forms
-from .models import Contact
-
-class ContactForm(forms.ModelForm):
-    class Meta:
-        model = Contact
-        fields = ['profile', 'mobile', 'email', 'address', 'zipcode', 'country']
-
-from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import FormUser
 
 class UserRegisterForm(UserCreationForm):
     class Meta:
@@ -30,34 +15,16 @@ class UserRegisterForm(UserCreationForm):
 class UserLoginForm(AuthenticationForm):
     username = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Enter Email'}))
 
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = ['profile', 'mobile', 'email', 'address', 'zipcode', 'country']
 
-
-from .models import FormSubmission
 class FormSubmission(forms.ModelForm):
     class Meta:
         model = FormSubmission
         fields = '__all__'
-
-
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import  Student
-
-# class CustomUserForm(UserCreationForm):
-#     email = forms.EmailField()
-
-#     class Meta:
-#         model = CustomUser
-#         fields = ['username', 'email', 'password1', 'password2']
-
-class StudentForm(forms.ModelForm):
-    class Meta:
-        model = Student
-        fields = ['name', 'age', 'phone']
-
-from django import forms
-from .models import UserProfile
-
+        
 class UserProfileForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)  # Hide password field
 
@@ -65,8 +32,6 @@ class UserProfileForm(forms.ModelForm):
         model = UserProfile
         fields = ['name', 'gender', 'dob', 'designation', 'experience', 'preferred_location', 'brief', 'username', 'password', 'form_banner']
 
-from django import forms
-from .models import FormDynamic
 
 class FormDynamicForm(forms.ModelForm):
     class Meta:
@@ -91,4 +56,9 @@ class DynamicFormFieldForm(forms.ModelForm):
     class Meta:
         model = DynamicField
         fields = '__all__'
+
+class StudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        fields = ['name', 'age', 'phone']
 
