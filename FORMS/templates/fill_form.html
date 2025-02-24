@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Fill Form{% endblock %}
+{% block content %}
+<h2>Fill {{ form.form.name }}</h2>
+<form id="dynamic-form">
+    {% for field in form.dynamic_forms.all %}
+        <label>{{ field.field_name }}</label>
+        {% if field.field_type == "Text" %}
+            <input type="text" name="{{ field.field_name }}" class="form-control">
+        {% elif field.field_type == "Date" %}
+            <input type="date" name="{{ field.field_name }}" class="form-control">
+        {% elif field.field_type == "MultiSelect" %}
+            <select name="{{ field.field_name }}" multiple class="form-control">
+                {% for option in field.options.split(",") %}
+                    <option value="{{ option }}">{{ option }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+        <br>
+    {% endfor %}
+    <button type="submit" class="btn btn-success">Submit</button>
+</form>
+
+<script>
+    document.getElementById("dynamic-form").addEventListener("submit", function(event) {
+        event.preventDefault();
+        
+        let formData = {};
+        let isValid = true;
+        let inputs = document.querySelectorAll("#dynamic-form input, #dynamic-form select");
+
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                alert(input.name + " field is required!");
+                isValid = false;
+            } else {
+                formData[input.name] = input.value;
+            }
+        });
+
+        if (isValid) {
+            fetch("", {
+                method: "POST",
+                body: JSON.stringify(formData),
+                headers: {"Content-Type": "application/json"}
+            }).then(response => response.json()).then(data => {
+                alert(data.message);
+                window.location.href = "/dashboard/";
+            });
+        }
+    });
+</script>
+{% endblock %}

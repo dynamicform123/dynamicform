@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Print Submission</title>
+    <script>
+        function printPage() {
+            window.print();
+        }
+    </script>
+</head>
+<body onload="printPage()">
+    <h2>Form Submission Details</h2>
+    <p><strong>Form Name:</strong> {{ submission.form.form.name }}</p>
+    <p><strong>User:</strong> {{ submission.user.email }}</p>
+    <h3>Submitted Data:</h3>
+    <ul>
+        {% for key, value in submission.data.items %}
+            <li><strong>{{ key }}</strong>: {{ value }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

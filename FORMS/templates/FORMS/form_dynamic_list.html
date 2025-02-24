@@ -1,0 +1,41 @@
+{% extends 'formbuilder/base.html' %}
+
+{% block content %}
+    <h2>Dynamic Forms</h2>
+    <a href="{% url 'form_dynamic_create' %}" class="btn btn-primary">Create New Dynamic Form</a>
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Form</th>
+                <th>validity</th>
+                <th>accessible_users</th>
+                <th>Sort Order</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for form in forms %}
+                <tr>
+                    <td>{{ form.form.name }}</td>
+                    <td>{{ form.validity }}</td>
+                    <td>{{ form.accessible_users }}</td>
+                    <td>{{ form.sort_order }}</td>
+                    <td>{{ form.status }}</td>
+                    <td>
+                        <a href="{% url 'form_dynamic_update' form.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'form_dynamic_delete' form.id %}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6">No dynamic forms available.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <a href="/FORMS_Dyn/createforms/">
+        <button>Forms</button>
+             </a>
+
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'formbuilder/base.html' %}
+
+{% block content %}
+    <h2>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Dynamic Form</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'form_dynamic_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}

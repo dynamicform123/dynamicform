@@ -1,0 +1,45 @@
+{% extends 'formbuilder/base.html'  %}
+
+{% block content %}
+<h2 class="text-center">User Profiles</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>DOB</th>
+            <th>Designation</th>
+            <th>Experience</th>
+            <th>Preferred Location</th>
+            <th>Brief</th>
+            <th>Username</th>
+            <th>Form Banner</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for profile in profiles %}
+        <tr>
+            <td>{{ profile.name }}</td>
+            <td>{{ profile.gender }}</td>
+            <td>{{ profile.dob }}</td>
+            <td>{{ profile.designation }}</td>
+            <td>{{ profile.experience }}</td>
+            <td>{{ profile.preferred_location }}</td>
+            <td>{{ profile.brief }}</td>
+            <td>{{ profile.username }}</td>
+            <td>
+                {% if profile.form_banner %}
+                <img src="{{ profile.form_banner.url }}" width="100">
+                {% else %}
+                No Image
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="/FORMS_Dyn/dynamic-forms/">
+    <button>Form Creater</button>
+         </a>
+
+{% endblock %}

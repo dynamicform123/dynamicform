@@ -1,0 +1,10 @@
+{% extends 'formbuilder/base.html' %}
+{% block content %}
+<h2>{{ form.name }} - Fields</h2>
+<a href="{% url 'form_field_add' %}" class="btn btn-primary">Add Field</a>
+<ul>
+    {% for field in fields %}
+        <li>{{ field.field_name }} ({{ field.get_field_type_display }})</li>
+    {% endfor %}
+</ul>
+{% endblock %}

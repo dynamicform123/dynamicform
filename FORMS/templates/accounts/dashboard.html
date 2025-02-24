@@ -1,0 +1,16 @@
+<h2>Welcome, {{ user.username }}</h2>
+<a href="{% url 'logout' %}">Logout</a>
+
+<h3>Fill Student Form</h3>
+<form method="post" action="{% url 'submit_student_form' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+
+<h3>Student Details</h3>
+<ul>
+    {% for student in students %}
+        <li>{{ student.name }} - {{ student.age }} - {{ student.phone }}</li>
+    {% endfor %}
+</ul>

@@ -1,0 +1,37 @@
+{% extends 'formbuilder/base.html' %}
+{% block content %}
+<h2>Contact List</h2>
+<a href="{% url 'contact_create' %}" class="btn btn-primary">Add Contact</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Profile</th>
+            <th>Mobile</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Zipcode</th>
+            <th>Country</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for contact in contacts %}
+        <tr>
+            <td>{{ contact.profile }}</td>
+            <td>{{ contact.mobile }}</td>
+            <td>{{ contact.email }}</td>
+            <td>{{ contact.address }}</td>
+            <td>{{ contact.zipcode }}</td>
+            <td>{{ contact.country }}</td>
+            <td>
+                <a href="{% url 'contact_update' contact.id %}" class="btn btn-warning">Edit</a>
+                <a href="{% url 'contact_delete' contact.id %}" class="btn btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="/FORMS_Dyn/dashboard/">
+    <button>User_Dashboard</button>
+         </a>
+{% endblock %}

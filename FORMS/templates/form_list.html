@@ -1,0 +1,11 @@
+{% extends 'accounts/base.html' %}
+{% block content %}
+<h2>Dynamic Forms</h2>
+<a href="{% url 'form_create' %}" class="btn btn-primary">Create New Form</a>
+<ul>
+    {% for form in forms %}
+        <li><a href="{% url 'form_detail' form.id %}">{{ form.name }}</a></li>
+    {% endfor %}
+</ul>
+<a href="{% url 'logout' %}">Logout</a>
+{% endblock %}

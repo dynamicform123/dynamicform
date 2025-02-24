@@ -1,0 +1,15 @@
+<form method="post">
+    {% csrf_token %}
+    {% for field in fields %}
+        <label>{{ field.field_label }}</label>
+        {% if field.field_type == "Text" %}
+            <input type="text" name="{{ field.field_label }}">
+        {% elif field.field_type == "Number" %}
+            <input type="number" name="{{ field.field_label }}">
+        {% elif field.field_type == "Date" %}
+            <input type="date" name="{{ field.field_label }}">
+        {% endif %}
+        <br>
+    {% endfor %}
+    <button type="submit">Submit</button>
+</form>

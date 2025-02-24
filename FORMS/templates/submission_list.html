@@ -1,0 +1,16 @@
+<table border="1">
+    <tr>
+        <th>User</th>
+        <th>Form</th>
+        <th>Data</th>
+        <th>Submitted At</th>
+    </tr>
+    {% for submission in submissions %}
+    <tr>
+        <td>{{ submission.user.email }}</td>
+        <td>{{ submission.form.name }}</td>
+        <td>{{ submission.data }}</td>
+        <td>{{ submission.submitted_at }}</td>
+    </tr>
+    {% endfor %}
+</table>

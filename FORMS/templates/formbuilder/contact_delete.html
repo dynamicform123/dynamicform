@@ -1,0 +1,10 @@
+{% extends 'formbuilder/base.html' %}
+{% block content %}
+<h2>Delete Contact</h2>
+<p>Are you sure you want to delete "{{ contact.profile }}"?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="{% url 'contact_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

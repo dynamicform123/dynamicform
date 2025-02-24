@@ -1,0 +1,38 @@
+<h2>Welcome, {{ user.username }} (User)</h2>
+<a href="{% url 'logout' %}">Logout</a>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>User Dashboard</title>
+</head>
+<body>
+    <h1>User Dashboard</h1>
+    
+    <label>Select Form:</label>
+    <select id="form-selector">
+        <option value="">--Select--</option>
+        <option value="/FORMS_Dyn/profile/">Basic Form</option>
+        <option value="/FORMS_Dyn/contacts/">Contact Form</option>
+    </select>
+
+    <script>
+        document.getElementById("form-selector").addEventListener("change", function() {
+            var selectedUrl = this.value;
+
+            if (selectedUrl) {
+                window.location.href = selectedUrl;  // Redirect to selected link
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

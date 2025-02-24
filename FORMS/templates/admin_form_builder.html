@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Form Builder{% endblock %}
+{% block content %}
+
+<h2>Create Your Form</h2>
+
+<!-- Field Selection Area -->
+<div class="row">
+    <div class="col-md-4">
+        <h4>Available Fields</h4>
+        <ul id="field-list" class="list-group">
+            <li class="list-group-item draggable" data-type="text">Text Field</li>
+            <li class="list-group-item draggable" data-type="date">Date Picker</li>
+            <li class="list-group-item draggable" data-type="select">Dropdown</li>
+            <li class="list-group-item draggable" data-type="textarea">Text Area</li>
+        </ul>
+    </div>
+
+    <!-- Form Design Area -->
+    <div class="col-md-8">
+        <h4>Design Your Form</h4>
+        <form id="form-builder" class="border p-3">
+            <div id="drop-area" class="p-3 bg-light" style="min-height: 200px; border: 2px dashed gray;">
+                Drag & Drop Fields Here
+            </div>
+            <button type="submit" class="btn btn-success mt-3">Save Form</button>
+        </form>
+    </div>
+</div>
+
+<!-- jQuery & jQuery UI -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // Make fields draggable
+        $(".draggable").draggable({
+            helper: "clone"
+        });
+
+        // Make drop area droppable
+        $("#drop-area").droppable({
+            accept: ".draggable",
+            drop: function (event, ui) {
+                let fieldType = ui.helper.data("type");
+                let newField = "";
+
+                if (fieldType === "text") {
+                    newField = '<div class="form-group"><label>Text Field</label><input type="text" class="form-control"></div>';
+                } else if (fieldType === "date") {
+                    newField = '<div class="form-group"><label>Date Picker</label><input type="date" class="form-control"></div>';
+                } else if (fieldType === "select") {
+                    newField = '<div class="form-group"><label>Dropdown</label><select class="form-control"><option>Option 1</option><option>Option 2</option></select></div>';
+                } else if (fieldType === "textarea") {
+                    newField = '<div class="form-group"><label>Text Area</label><textarea class="form-control"></textarea></div>';
+                }
+
+                $("#drop-area").append(newField);
+            }
+        });
+
+        // Save Form Logic
+        $("#form-builder").submit(function (event) {
+            event.preventDefault();
+            alert("Form Saved Successfully!");
+        });
+    });
+</script>
+
+{% endblock %}
+
+<script>
+    $("#form-builder").submit(function (event) {
+        event.preventDefault();
+
+        let fields = [];
+        $("#drop-area .form-group").each(function () {
+            let label = $(this).find("label").text();
+            let type = $(this).find("input, select, textarea").prop("tagName").toLowerCase();
+            fields.push({label: label, type: type});
+        });
+
+        $.ajax({
+            url: "{% url 'save_form' %}",
+            method: "POST",
+            headers: {"X-CSRFToken": "{{ csrf_token }}"},
+            data: JSON.stringify({name: "New Form", fields: fields}),
+            contentType: "application/json",
+            success: function (response) {
+                alert("Form Saved Successfully!");
+            }
+        });
+    });
+</script>
